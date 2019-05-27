@@ -80,9 +80,6 @@ function getAverageColor(img) {
     g = Math.floor(g / (data.length / 4));
     b = Math.floor(b / (data.length / 4));
 
-    const preview = avrg.querySelector('canvas');
-    preview.getContext('2d').drawImage(canvas, 0, 0, 1, 1);
-
     return [r, g, b];
 }
 
@@ -108,8 +105,14 @@ async function createMovieBarcode(video) {
 
     async function scanFrame(frame) {
         const color = getAverageColor(video);
+
         context.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
         context.fillRect(frame, 0, 1, height);
+
+        const preview = avrg.querySelector('canvas');
+        const prev = preview.getContext('2d');
+        prev.fillStyle = context.fillStyle;
+        prev.fillRect(0, 0, 1, 1);
     }
 
     let frame = 0;
