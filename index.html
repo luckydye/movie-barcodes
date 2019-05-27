@@ -2,41 +2,74 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <style>
         body {
             margin: 0;
             padding: 0;
             background: black;
-
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
         }
+        .row {
+            display: flex;
+            margin-bottom: 20px;
+        }
         video {
-            max-width: 200px;
-            margin-bottom: 40px;
+            max-height: 128px;
         }
         input {
-            margin-bottom: 20px;
+            cursor: pointer;
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+        }
+        .input {
+            border-radius: 3px;
+            position: relative;
             padding: 10px 15px;
             background: #1c1c1c;
             color: #eee;
+            font-family: sans-serif;
+            width: 200px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: .2s ease-out;
+        }
+        .input:hover {
+            transition-duration: .1s;
+            background: #232323;
+        }
+        .input:active {
+            transition-duration: .0s;
+            background: #1a1a1a;
+            transform: scale(0.995);
+        }
+        .movie-barcode {
+            margin: 0 1px;
         }
     </style>
 
     <script src="main.js"></script>
 </head>
 <body>
-    <input type="file" multiple>
+    <div class="row input">
+        <input type="file" multiple>
+        <span id="fileStatus">Click to choose file</span>
+    </div>
+    <div class="row" id="videos"></div>
+    <div class="row" id="barcodes"></div>
 </body>
 </html>
