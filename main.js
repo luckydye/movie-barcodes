@@ -92,6 +92,9 @@ async function createMovieBarcode(video) {
         paused = !paused;
     }
 
+    const buffer = document.createElement('video');
+    buffer.src = video.src;
+
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     const width = fps * video.duration;
@@ -103,7 +106,7 @@ async function createMovieBarcode(video) {
     canvas.className = "movie-barcode";
     barcodes.appendChild(canvas);
 
-    async function scanFrame(frame) {
+    async function scanFrame(frame, video) {
         const color = getAverageColor(video);
 
         context.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
@@ -123,15 +126,19 @@ async function createMovieBarcode(video) {
 
         async function tick() {
             if(!paused) {
+                const step = (1000 / fps) / 1000;
+
                 video.currentTime = time;
+                buffer.currentTime = time + step;
 
                 while(video.readyState !== 4 && !video.ended) 
                     await sleep(2);
 
-                scanFrame(frame);
+                scanFrame(frame, video);
+                scanFrame(frame+1, buffer);
                 
-                time += (1000 / fps) / 1000;
-                frame++;
+                frame += 2;
+                time += step * 2;
             }
     
             if(time > video.duration) {
