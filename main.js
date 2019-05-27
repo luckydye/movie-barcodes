@@ -40,9 +40,15 @@ async function scan(videoFile) {
         const video = document.createElement('video');
         videos.appendChild(video);
         video.onloadedmetadata = async () => {
-            createMovieBarcode(video).then(canvas => {
-                resolve(canvas);
-            })
+
+            const canvas = document.createElement('canvas');
+            canvas.className = "movie-barcode";
+            barcodes.appendChild(canvas);
+
+            createMovieBarcode({
+                canvas,
+                video
+            }).then(canvas => resolve(canvas));
         }
         video.muted = true;
         video.src = videoFile;
@@ -83,25 +89,18 @@ function getAverageColor(img) {
     return [r, g, b];
 }
 
-async function createMovieBarcode(video) {
+async function createMovieBarcode({ canvas, video, start, end }) {
+
+    start = start ? start : 0;
+    end = end ? end : video.duration;
 
     const fps = 30;
-
-    let paused = false;
-    video.onclick = () => {
-        paused = !paused;
-    }
-
-    const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     const width = fps * video.duration;
     const height = width / 4;
 
     canvas.width = width;
     canvas.height = height;
-
-    canvas.className = "movie-barcode";
-    barcodes.appendChild(canvas);
 
     async function scanFrame(frame) {
         const color = getAverageColor(video);
@@ -117,16 +116,23 @@ async function createMovieBarcode(video) {
 
     let frame = 0;
     let time = 0;
+    let paused = false;
+    let ended = false;
 
     return new Promise((resolve) => {
         const timestamp = Date.now();
+    
+        video.onclick = () => {
+            paused = !paused;
+        }
 
         async function tick() {
             if(!paused) {
                 video.currentTime = time;
+                ended = time >= end;
 
-                while(video.readyState !== 4 && !video.ended) 
-                    await sleep(2);
+                while(video.readyState !== 4 && !ended) 
+                    await sleep(4);
 
                 scanFrame(frame);
                 
@@ -134,7 +140,7 @@ async function createMovieBarcode(video) {
                 frame++;
             }
     
-            if(time > video.duration) {
+            if(ended) {
                 console.log('finished in', ((Date.now() - timestamp) / 1000) + 's');
                 resolve(canvas);
             } else {
