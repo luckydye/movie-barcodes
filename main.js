@@ -6,38 +6,41 @@ async function pageScript() {
 
     input.addEventListener('change', e => {
         for(let file of input.files) {
-            const fr = new FileReader();
-            fr.onload = () => {
-                fileStatus.innerText = "Creating Movie Barcode..";
+            if(file.type.match('video')) {
+                const fr = new FileReader();
+                fr.onload = () => {
+                    fileStatus.innerText = "Creating Movie Barcode..";
 
-                scan(file, fr.result).then(() => {
-                    files.delete(file);
-                    if(files.size == 0) {
-                        fileStatus.innerText = "Done";
-                    }
-                });
-            };
-            files.add(file);
-            fileStatus.innerText = "Loading file..";
-            fr.readAsDataURL(file);
+                    scan(fr.result).then(canvas => {
+                        files.delete(file);
+                        if(files.size == 0) {
+                            fileStatus.innerText = "Done";
+                        }
+                        download(canvas, file);
+                    });
+                };
+                files.add(file);
+                fileStatus.innerText = "Loading file..";
+                fr.readAsDataURL(file);
+            }
         }
     });
 }
 
 function download(canvas, file) {
     const a = document.createElement('a');
-    a.setAttribute("download", file.name + "-barcode");
-    a.href = canvas.toDataURL();
+    const name = file.name.split('.')[0];
+    a.setAttribute("download", name + "-barcode.png");
+    a.href = canvas.toDataURL('image/png');
     a.click();
 }
 
-async function scan(file, videoFile) {
+async function scan(videoFile) {
     return new Promise((resolve) => {
         const video = document.createElement('video');
         videos.appendChild(video);
         video.onloadedmetadata = async () => {
-            createMovieBarcode(video).then((canvas) => {
-                download(canvas, file);
+            createMovieBarcode(video).then(canvas => {
                 resolve(canvas);
             })
         }
@@ -46,31 +49,34 @@ async function scan(file, videoFile) {
     })
 }
 
+function sleep(ms) {
+    return new Promise((resolve) => {
+        setTimeout(() => resolve(), ms);
+    })
+}
+
 async function createMovieBarcode(video) {
+
+    const fps = 30;
+
+    let paused = false;
+    video.onclick = () => {
+        paused = !paused;
+    }
+
     const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    const width = fps * video.duration;
+    const height = 200;
+
     canvas.className = "movie-barcode";
     barcodes.appendChild(canvas);
 
-    const context = canvas.getContext('2d');
-
-    const width = video.duration;
-    const height = 150;
-
     canvas.width = width;
     canvas.height = height;
-    
-    for(let i = 0; i < video.duration; i++) {
-        video.currentTime = i;
-
-        while(video.readyState !== 4 && !video.ended) await sleep(2);
-
-        const color = getAvgColor(video);
-        context.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-        context.fillRect(i, 0, 1, height);
-    }
 
     function getAvgColor(video) {
-        const canvas = document.createElement('canvas');
+        const canvas = avrg.querySelector('canvas');
         canvas.width = 1;
         canvas.height = 1;
     
@@ -80,11 +86,40 @@ async function createMovieBarcode(video) {
         return ctx.getImageData(0, 0, 1, 1).data;
     }
 
-    return canvas;
-}
+    async function scanFrame(time, frame) {
+        video.currentTime = time;
 
-function sleep(ms) {
+        while(video.readyState !== 4 && !video.ended) 
+            await sleep(2);
+
+        const color = getAvgColor(video);
+        context.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+        context.fillRect(frame, 0, 1, height);
+    }
+
+    let frame = 0;
+    let time = 0;
+
+    console.log(video.currentFrameTime);
+
     return new Promise((resolve) => {
-        setTimeout(() => resolve(), ms);
+        const timestamp = Date.now();
+
+        async function tick() {
+            if(!paused) {
+                await scanFrame(time, frame);
+                time += (1000 / fps) / 1000;
+                frame++;
+            }
+    
+            if(time > video.duration) {
+                console.log('finished in', ((Date.now() - timestamp) / 1000) + 's');
+                resolve(canvas);
+            } else {
+                requestAnimationFrame(tick);
+            }
+        }
+    
+        tick();
     })
 }

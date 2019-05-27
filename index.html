@@ -18,13 +18,7 @@
             width: 100%;
             height: 100%;
         }
-        .row {
-            display: flex;
-            margin-bottom: 20px;
-        }
-        video {
-            max-height: 128px;
-        }
+
         input {
             cursor: pointer;
             opacity: 0;
@@ -34,42 +28,79 @@
             height: 100%;
             width: 100%;
         }
+
         .input {
-            border-radius: 3px;
             position: relative;
-            padding: 10px 15px;
-            background: #1c1c1c;
-            color: #eee;
-            font-family: sans-serif;
             width: 200px;
             height: 40px;
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: .2s ease-out;
+            background: #1c1c1c;
+            padding: 10px 15px;
         }
-        .input:hover {
+
+        .input, button, video {
+            margin: 0 10px;
+            border: none;
+            color: #eee;
+            border-radius: 3px;
+            font-family: sans-serif;
+            cursor: pointer;
+            transition: .2s ease-out;
+            outline: none;
+        }
+        .input:hover, button:hover, video:hover {
             transition-duration: .1s;
             background: #232323;
         }
-        .input:active {
+        .input:active, button:active, video:active {
             transition-duration: .0s;
             background: #1a1a1a;
             transform: scale(0.995);
         }
+
+        video {
+            max-height: 128px;
+            margin: 0 1px;
+        }
+        video:hover {
+            opacity: 0.75;
+        }
+        
+        .row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
         .movie-barcode {
             margin: 0 1px;
+            max-width: 90%;
+        }
+
+        #avrg canvas {
+            height: 128px;
+            margin-right: 10px;
         }
     </style>
 
     <script src="main.js"></script>
 </head>
 <body>
-    <div class="row input">
-        <input type="file" multiple>
-        <span id="fileStatus">Click to choose file</span>
+    <div id="buttons" class="row">
+        <div class="input">
+            <input type="file" multiple/>
+            <span id="fileStatus">Click to choose file</span>
+        </div>
     </div>
-    <div class="row" id="videos"></div>
+    
+    <div class="row" id="videos">
+        <div id="avrg">
+            <canvas></canvas>
+        </div>
+    </div>
+
     <div class="row" id="barcodes"></div>
 </body>
 </html>
