@@ -95,7 +95,7 @@ async function createMovieBarcode(video) {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     const width = fps * video.duration;
-    const height = width / 3;
+    const height = width / 4;
 
     canvas.width = width;
     canvas.height = height;

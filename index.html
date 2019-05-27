@@ -7,9 +7,11 @@
         body {
             margin: 0;
             padding: 0;
-            background: black;
-            display: flex;
-            flex-direction: column;
+            background: #0f0f0f;
+            color: #eee;
+            font-family: sans-serif;
+            display: grid;
+            grid-template-rows: auto auto 1fr;
             justify-content: center;
             align-items: center;
             position: absolute;
@@ -17,16 +19,6 @@
             left: 0;
             width: 100%;
             height: 100%;
-        }
-
-        input {
-            cursor: pointer;
-            opacity: 0;
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 100%;
         }
 
         .input {
@@ -37,13 +29,14 @@
             justify-content: center;
             align-items: center;
             background: #1c1c1c;
-            padding: 10px 15px;
+            padding: 15px 25px;
+            text-align: center;
+            line-height: 1.33;
         }
 
         .input, button, video {
             margin: 0 10px;
             border: none;
-            color: #eee;
             border-radius: 3px;
             font-family: sans-serif;
             cursor: pointer;
@@ -60,9 +53,18 @@
             transform: scale(0.995);
         }
 
+        input {
+            cursor: pointer;
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+        }
+
         video {
-            max-height: 240px;
-            margin: 0 1px;
+            max-height: 320px;
         }
         video:hover {
             opacity: 0.75;
@@ -71,13 +73,12 @@
         .row {
             display: flex;
             justify-content: center;
-            margin-bottom: 20px;
+            margin: 40px 0;
         }
 
         .movie-barcode {
             margin: 0 1px;
-            max-width: 90%;
-            max-height: 90%;
+            height: 200px;
         }
 
         #avrg canvas {
@@ -90,10 +91,10 @@
     <script src="main.js"></script>
 </head>
 <body>
-    <div id="buttons" class="row">
+    <div class="row">
         <div class="input">
             <input type="file" multiple/>
-            <span id="fileStatus">Click to choose file</span>
+            <span id="fileStatus">Click to choose file to convert to Barcode</span>
         </div>
     </div>
     
