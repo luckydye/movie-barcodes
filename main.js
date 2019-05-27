@@ -55,6 +55,37 @@ function sleep(ms) {
     })
 }
 
+function getAverageColor(img) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const width = 1280;
+    const height = 720;
+    canvas.width = width;
+    canvas.height = height;
+
+    ctx.drawImage(img, 0, 0, width, height);
+
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+    let r = 0, g = 0, b = 0;
+
+    for (let i = 0, l = data.length; i < l; i += 4) {
+        r += data[i];
+        g += data[i+1];
+        b += data[i+2];
+    }
+
+    r = Math.floor(r / (data.length / 4));
+    g = Math.floor(g / (data.length / 4));
+    b = Math.floor(b / (data.length / 4));
+
+    const preview = avrg.querySelector('canvas');
+    preview.getContext('2d').drawImage(canvas, 0, 0, 1, 1);
+
+    return [r, g, b];
+}
+
 async function createMovieBarcode(video) {
 
     const fps = 30;
@@ -67,32 +98,16 @@ async function createMovieBarcode(video) {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     const width = fps * video.duration;
-    const height = 200;
-
-    canvas.className = "movie-barcode";
-    barcodes.appendChild(canvas);
+    const height = width / 3;
 
     canvas.width = width;
     canvas.height = height;
 
-    function getAvgColor(video) {
-        const canvas = avrg.querySelector('canvas');
-        canvas.width = 1;
-        canvas.height = 1;
-    
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, 1, 1);
-    
-        return ctx.getImageData(0, 0, 1, 1).data;
-    }
+    canvas.className = "movie-barcode";
+    barcodes.appendChild(canvas);
 
-    async function scanFrame(time, frame) {
-        video.currentTime = time;
-
-        while(video.readyState !== 4 && !video.ended) 
-            await sleep(2);
-
-        const color = getAvgColor(video);
+    async function scanFrame(frame) {
+        const color = getAverageColor(video);
         context.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
         context.fillRect(frame, 0, 1, height);
     }
@@ -100,14 +115,18 @@ async function createMovieBarcode(video) {
     let frame = 0;
     let time = 0;
 
-    console.log(video.currentFrameTime);
-
     return new Promise((resolve) => {
         const timestamp = Date.now();
 
         async function tick() {
             if(!paused) {
-                await scanFrame(time, frame);
+                video.currentTime = time;
+
+                while(video.readyState !== 4 && !video.ended) 
+                    await sleep(2);
+
+                scanFrame(frame);
+                
                 time += (1000 / fps) / 1000;
                 frame++;
             }
