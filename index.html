@@ -86,12 +86,25 @@
             width: 100px;
             margin-right: 10px;
         }
+
+        .header {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .warning {
+            text-align: center;
+            opacity: 0.25;
+            margin: 0 0 20px 0;
+            font-size: 14px;
+        }
     </style>
 
     <script src="main.js"></script>
 </head>
 <body>
-    <div class="row">
+    <div class="row header">
+        <div class="warning">The higher the resolution, the longer it takes.</div>
         <div class="input">
             <input type="file" multiple/>
             <span id="fileStatus">Click to choose file to convert to Barcode</span>
